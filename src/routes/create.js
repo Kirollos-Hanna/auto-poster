@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { invoke } from '@tauri-apps/api'
+import './create.css'
 
 export default function Create() {
     let [tweetContent, setTweetContent] = useState("");
@@ -86,7 +87,7 @@ export default function Create() {
                     noDate &&
                     <p className='pad-top-5px validation-text'>Please select a date</p>
                 }
-                <button type="button" onClick={scheduleTweet}>Post</button>
+                <button type="button" className='post-btn' onClick={scheduleTweet}>Post</button>
             </form>
         </div>
     );
