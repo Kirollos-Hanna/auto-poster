@@ -1,46 +1,37 @@
-import { useState } from 'react'
 import { invoke } from '@tauri-apps/api'
+import { ToastContainer, toast } from 'react-toastify';
 import './create.css'
+import {
+    isTooLong,
+    isValidDate,
+    isRequired,
+    useForm,
+} from '../hooks/useForm';
+
+const scheduleTweet = (values) => {
+    // TODO on success show toast saying "scheduled successfully"
+    // TODO on failure show toast saying "failed to schedule tweet"
+    let parsedDate = new Date(Date.parse(values.postDate));
+
+    invoke('schedule_tweet',
+        {
+            tweetContent: values.tweetContent,
+            postDate: parsedDate
+        }).then((res) => console.log("Success!!!"))
+        .catch((err) => console.log(`Error: ${err}`));
+}
 
 export default function Create() {
-    let [tweetContent, setTweetContent] = useState("");
-    let [postDate, setPostDate] = useState("");
-    let [invalidDate, setInvalidDate] = useState(false);
-    let [noDate, setNoDate] = useState(false);
-    let [emptyTweet, setEmptyTweet] = useState(false);
-    let [longTweet, setLongTweet] = useState(false);
 
-    const validateInput = () => {
-        const now = new Date();
-        const parsedDate = new Date(Date.parse(postDate));
+    const initialState = { tweetContent: '', postDate: '' };
+    const validations = [
+        ({ tweetContent }) => isRequired(tweetContent) || { tweetContent: 'Content cannot be empty' },
+        ({ tweetContent }) => isTooLong(tweetContent) || { tweetContent2: 'Content cannot be longer than 280 characters' },
+        ({ postDate }) => isRequired(postDate) || { postDate: 'Please select a date' },
+        ({ postDate }) => isValidDate(postDate) || { postDate2: 'Pick a future date' },
+    ];
+    const { values, errors, touched, isValid, changeHandler, submitHandler } = useForm(initialState, validations, scheduleTweet);
 
-        // Validate that the picked datetime is greater than the current datetime
-        setInvalidDate(now.getTime() >= parsedDate.getTime());
-        setNoDate(parsedDate.toString() === "Invalid Date");
-        // Validate that the content is not empty and is within the acceptable lngth for a tweet
-        setEmptyTweet(tweetContent.length === 0);
-        // Validate that the content is within the acceptable length for a tweet
-        setLongTweet(tweetContent.length > 280);
-    }
-
-    const scheduleTweet = () => {
-        validateInput();
-
-        if (!(noDate || invalidDate || emptyTweet || longTweet)) {
-            console.log("posting...")
-            // TODO on success show toast saying "scheduled successfully"
-            // TODO on failure show toast saying "failed to schedule tweet"
-
-            let parsedDate = new Date(Date.parse(postDate));
-
-            invoke('schedule_tweet',
-                {
-                    tweetContent,
-                    postDate: parsedDate
-                }).then((res) => console.log("Success!!!"))
-                .catch((err) => console.log(`Error: ${err}`));
-        }
-    }
     return (
         <div>
             <p>
@@ -49,45 +40,45 @@ export default function Create() {
             <form>
                 <label htmlFor="tweet-content">Tweet Content</label>
                 <textarea
-                    className={emptyTweet || longTweet ? 'red-border' : ''}
-                    name="tweet-content"
+                    className={touched.tweetContent && (errors.tweetContent || errors.tweetContent2) ? 'red-border' : ''}
+                    name="tweetContent"
                     id="tweet-content"
                     cols="50"
                     rows="8"
-                    onChange={e => {
-                        setEmptyTweet(false)
-                        setLongTweet(false)
-                        setTweetContent(e.target.value)
-                    }}></textarea>
+                    value={values.tweetContent}
+                    onChange={changeHandler}></textarea>
                 {
-                    emptyTweet &&
-                    <p className='validation-text'>Content cannot be empty</p>
+                    touched.tweetContent && errors.tweetContent &&
+                    <p className='validation-text'>{errors.tweetContent}</p>
                 }
                 {
-                    longTweet &&
-                    <p className='validation-text'>Content cannot be longer than 280 characters</p>
+                    touched.tweetContent && errors.tweetContent2 &&
+                    <p className='validation-text'>{errors.tweetContent2}</p>
                 }
                 <label htmlFor="post-date">Post Date</label>
                 <input
-                    className={invalidDate || noDate ? 'red-border' : ''}
+                    className={touched.postDate && (errors.postDate2 || errors.postDate) ? 'red-border' : ''}
                     type="datetime-local"
                     id="post-date"
-                    name="post-date"
-                    value={postDate}
-                    onChange={e => {
-                        setNoDate(false)
-                        setInvalidDate(false)
-                        setPostDate(e.target.value)
-                    }} />
+                    name="postDate"
+                    value={values.postDate}
+                    onChange={changeHandler} />
                 {
-                    invalidDate &&
-                    <p className='pad-top-5px validation-text'>Pick a future date</p>
+                    touched.postDate && errors.postDate2 &&
+                    <p className='pad-top-5px validation-text'>{errors.postDate2}</p>
                 }
                 {
-                    noDate &&
-                    <p className='pad-top-5px validation-text'>Please select a date</p>
+                    touched.postDate && errors.postDate &&
+                    <p className='pad-top-5px validation-text'>{errors.postDate}</p>
                 }
-                <button type="button" className='post-btn' onClick={scheduleTweet}>Post</button>
+                <button
+                    type="button"
+                    className='post-btn'
+                    onClick={submitHandler}
+                    disabled={!isValid}
+                >
+                    Post
+                </button>
             </form>
         </div>
     );

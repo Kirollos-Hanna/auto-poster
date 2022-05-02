@@ -8,7 +8,6 @@ import AddCircle from './icons/addCircle';
 import PieChart from './icons/pieChart';
 import Settings from './icons/settings';
 import Home from './icons/home';
-import { ToastContainer, toast } from 'react-toastify';
 import { appWindow } from '@tauri-apps/api/window'
 import { useState } from 'react'
 import { NavLink, Outlet } from "react-router-dom";
@@ -62,7 +61,7 @@ function App() {
 
       <div className="App-header">
         <nav style={{ minWidth: (sideNavWidth + 'px') }} className="navigation-tab">
-          <NavLink to="/home" style={navMenuItemStyle}
+          <NavLink to="/" style={navMenuItemStyle}
 
             className={({ isActive }) => (isActive ? "selected-menu-item" : "") + " pad-top-item menu-item"}>
             <Home />
