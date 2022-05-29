@@ -3,6 +3,7 @@
 - install and setup [rust](https://www.rust-lang.org/tools/install) on your machine
 - download and install [postgresql](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads)
 - download and install [cmake](https://cmake.org/download/)
+- download and install [visual studio build tools](https://visualstudio.microsoft.com/downloads/?q=build+tools)
 - run `cargo install sqlx-cli --no-default-features --features native-tls,postgres` to install the sqlx cli for postgres
 
 # How to run
